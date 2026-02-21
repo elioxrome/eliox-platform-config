@@ -1,0 +1,22 @@
+replicaCount: 1
+
+image:
+  repository: mc-user-fastapi
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 8000
+
+resources: {}
+
+readinessProbe:
+  path: /actuator/health
+  initialDelaySeconds: 5
+  periodSeconds: 5
+
+livenessProbe:
+  path: /actuator/health
+  initialDelaySeconds: 10
+  periodSeconds: 10
