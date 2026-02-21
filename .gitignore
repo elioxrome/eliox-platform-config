@@ -1,0 +1,6 @@
+*.tgz
+*.tar.gz
+charts/**/charts/
+charts/**/tmpcharts/
+charts/**/.DS_Store
+.DS_Store

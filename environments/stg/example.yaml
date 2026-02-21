@@ -1,0 +1,10 @@
+replicaCount: 2
+image:
+  tag: "1.0.0-rc"
+resources:
+  requests:
+    cpu: 200m
+    memory: 256Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi

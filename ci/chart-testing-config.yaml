@@ -1,0 +1,8 @@
+chart-dirs:
+  - charts
+excluded-charts:
+  - _templates
+check-version-increment: true
+validate-maintainers: false
+target-branch: main
+helm-extra-args: "--timeout 600s"
