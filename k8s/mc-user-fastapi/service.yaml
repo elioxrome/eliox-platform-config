@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: mc-user-fastapi
+  namespace: mc-user-fastapi
+spec:
+  type: ClusterIP
+  selector:
+    app: mc-user-fastapi
+  ports:
+  - name: http
+    port: 8000
+    targetPort: 8000

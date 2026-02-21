@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mc-user-fastapi
+  namespace: mc-user-fastapi
+  labels:
+    app: mc-user-fastapi
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mc-user-fastapi
+  template:
+    metadata:
+      labels:
+        app: mc-user-fastapi
+    spec:
+      containers:
+      - name: mc-user-fastapi
+        image: mc-user-fastapi:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8000
+        readinessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8000
+          initialDelaySeconds: 10
+          periodSeconds: 10
