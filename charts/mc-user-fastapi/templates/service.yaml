@@ -3,15 +3,13 @@ kind: Service
 metadata:
   name: {{ include "mc-user-fastapi.fullname" . }}
   labels:
-    app.kubernetes.io/name: {{ include "mc-user-fastapi.name" . }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
+    {{- include "mc-user-fastapi.labels" . | nindent 4 }}
 spec:
   type: {{ .Values.service.type }}
   selector:
-    app.kubernetes.io/name: {{ include "mc-user-fastapi.name" . }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
+    {{- include "mc-user-fastapi.selectorLabels" . | nindent 4 }}
   ports:
-  - name: http
-    port: {{ .Values.service.port }}
-    targetPort: http
-    protocol: TCP
+    - name: http
+      port: {{ .Values.service.port }}
+      targetPort: http
+      protocol: TCP

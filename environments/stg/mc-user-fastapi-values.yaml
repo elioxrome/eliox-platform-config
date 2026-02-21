@@ -1,0 +1,21 @@
+replicaCount: 2
+image:
+  tag: "1.0.0-rc"
+resources:
+  requests:
+    cpu: 250m
+    memory: 384Mi
+  limits:
+    cpu: 600m
+    memory: 768Mi
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 6
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
+networkPolicy:
+  enabled: true
+  allowSameNamespace: true
+  ingressCIDRs: []
+  egressAllowAll: true

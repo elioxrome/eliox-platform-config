@@ -1,0 +1,24 @@
+replicaCount: 3
+image:
+  tag: "1.0.0"
+resources:
+  requests:
+    cpu: 400m
+    memory: 512Mi
+  limits:
+    cpu: "1"
+    memory: 1Gi
+autoscaling:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 12
+  targetCPUUtilizationPercentage: 65
+  targetMemoryUtilizationPercentage: 75
+networkPolicy:
+  enabled: true
+  allowSameNamespace: true
+  ingressCIDRs: []
+  egressAllowAll: true
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 2

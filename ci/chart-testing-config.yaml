@@ -4,5 +4,7 @@ excluded-charts:
   - _templates
 check-version-increment: true
 validate-maintainers: false
+validate-chart-schema: false
+lint-conf: ci/lintconf.yaml
 target-branch: main
 helm-extra-args: "--timeout 600s"

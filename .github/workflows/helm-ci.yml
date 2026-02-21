@@ -34,6 +34,9 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Install yamllint
+        run: pip install yamllint==1.37.1
+
       - name: Install Chart Testing
         uses: helm/chart-testing-action@v2.7.0
 

@@ -1,12 +1,19 @@
-## uso de kind para cargar la imagen en el registry 
-kind load docker-image mc-user-fastapi:latest --name eliox-cluster
+## Cargar imagen local en kind
+```bash
+kind load docker-image ghcr.io/sabadell/mc-user-fastapi:1.0.0-dev --name eliox-cluster
+```
 
-## apply for helm 
-helm upgrade --install mc-user-fastapi deploy/helm/mc-user-fastapi `
-  --namespace mc-user-fastapi --create-namespace `
-  --set image.repository=mc-user-fastapi `
-  --set image.tag=latest `
-  --wait --timeout 120s
+## Deploy con Helm (entorno dev)
+```bash
+helm upgrade --install mc-user-fastapi charts/mc-user-fastapi \
+  --namespace mc-user-fastapi \
+  --create-namespace \
+  -f charts/mc-user-fastapi/values.yaml \
+  -f environments/dev/mc-user-fastapi-values.yaml \
+  --wait --timeout 180s
+```
 
-## get info for deployment
-kubectl -n mc-user-fastapi get deploy,pods,svc
+## Verificar recursos
+```bash
+kubectl -n mc-user-fastapi get deploy,pods,svc,hpa,pdb
+```

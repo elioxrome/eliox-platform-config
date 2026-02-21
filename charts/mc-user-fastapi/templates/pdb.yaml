@@ -1,0 +1,13 @@
+{{- if .Values.podDisruptionBudget.enabled }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "mc-user-fastapi.fullname" . }}
+  labels:
+    {{- include "mc-user-fastapi.labels" . | nindent 4 }}
+spec:
+  minAvailable: {{ .Values.podDisruptionBudget.minAvailable }}
+  selector:
+    matchLabels:
+      {{- include "mc-user-fastapi.selectorLabels" . | nindent 6 }}
+{{- end }}

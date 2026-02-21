@@ -14,3 +14,29 @@
 {{- end -}}
 {{- end -}}
 {{- end -}}
+
+{{- define "mc-user-fastapi.chart" -}}
+{{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
+{{- define "mc-user-fastapi.labels" -}}
+helm.sh/chart: {{ include "mc-user-fastapi.chart" . }}
+{{ include "mc-user-fastapi.selectorLabels" . }}
+{{- if .Chart.AppVersion }}
+app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+{{- end }}
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- end -}}
+
+{{- define "mc-user-fastapi.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "mc-user-fastapi.name" . }}
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end -}}
+
+{{- define "mc-user-fastapi.serviceAccountName" -}}
+{{- if .Values.serviceAccount.create -}}
+{{- default (include "mc-user-fastapi.fullname" .) .Values.serviceAccount.name -}}
+{{- else -}}
+{{- default "default" .Values.serviceAccount.name -}}
+{{- end -}}
+{{- end -}}
