@@ -2,8 +2,20 @@ name: helm-ci
 
 on:
   pull_request:
+    paths:
+      - "charts/**"
+      - "environments/**"
+      - "ci/**"
+      - "scripts/**"
+      - ".github/workflows/helm-ci.yml"
   push:
     branches: [main]
+    paths:
+      - "charts/**"
+      - "environments/**"
+      - "ci/**"
+      - "scripts/**"
+      - ".github/workflows/helm-ci.yml"
 
 jobs:
   validate:
@@ -11,6 +23,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Helm
         uses: azure/setup-helm@v4
