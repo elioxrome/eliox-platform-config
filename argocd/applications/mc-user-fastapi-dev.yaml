@@ -1,0 +1,26 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: mc-user-fastapi-dev
+  namespace: argocd
+spec:
+  project: default
+
+  source:
+    repoURL: https://github.com/elioxrome/eliox-platform-config.git
+    targetRevision: gitops
+    path: charts/mc-user-fastapi
+    helm:
+      valueFiles:
+        - ../../environments/dev/mc-user-fastapi-values.yaml
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: apps
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
