@@ -1,4 +1,4 @@
-# Blueprint DevOps para Repositorio de Helm Charts
+# Repositorio de Helm Charts
 
 Estructura avanzada para gestionar Helm Charts y manifiestos Kubernetes:
 
@@ -45,9 +45,9 @@ Estructura avanzada para gestionar Helm Charts y manifiestos Kubernetes:
 └── .pre-commit-config.yaml
 ```
 
-## Flujo recomendado
+## Flujo
 
-1. El equipo de plataforma mantiene el estandar en `charts/_templates/base`.
+1. Se mantiene el estandar en `charts/_templates/base`.
 2. Cada servicio vive en `charts/<servicio>`.
 3. Overrides por entorno en `environments/<env>`.
 4. En cada Pull Request se ejecutan lint, schema, render y policy checks.
@@ -75,7 +75,7 @@ make template CHART=bs-fastapi-repo ENV=dev
 | `kubectl` | Opcional | Verificacion manual de recursos cuando revisas en cluster. |
 | `kind` | Opcional | Entorno local de pruebas Kubernetes sin usar cluster compartido. |
 
-### Comprobacion rapida
+### Comprobación rapida
 
 ```bash
 helm version
@@ -92,11 +92,10 @@ Si alguna no esta instalada, `make test-local` degrada validaciones opcionales y
 - Versionado SemVer en `Chart.yaml` (`version`).
 - Imagen de la app en `appVersion`.
 - Todo chart debe incluir `values.schema.json`.
-- `CODEOWNERS` obliga aprobacion del equipo DevOps.
 
 # Conftest
 
-Conftest te ayuda a escribir pruebas sobre configuraciones estructuradas.
+Conftest ayuda a escribir pruebas sobre configuraciones estructuradas.
 Con Conftest puedes validar configuraciones de Kubernetes, pipelines Tekton, Terraform, Serverless y otros formatos.
 
 Conftest usa Rego (Open Policy Agent) para definir reglas.
@@ -157,14 +156,14 @@ kubeconform -strict -summary /tmp/mc-user-fastapi-dev.yaml
 conftest test /tmp/mc-user-fastapi-dev.yaml --policy policies/conftest
 ```
 
-## Simular instalacion completa (dry-run)
+## Simular instalación
 
 ```bash
 helm install --dry-run --debug mc-user-fastapi charts/mc-user-fastapi \
   -f environments/dev/mc-user-fastapi-values.yaml
 ```
 
-## Lint estilo CI con `ct` (sin exigir bump mientras iteras)
+## Lint
 
 ```bash
 ct lint --all --config ci/chart-testing-config.yaml
