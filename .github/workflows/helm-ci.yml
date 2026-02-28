@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -30,7 +30,7 @@ jobs:
         uses: azure/setup-helm@v4
 
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.11"
 
@@ -38,7 +38,7 @@ jobs:
         run: pip install yamllint==1.37.1
 
       - name: Install Chart Testing
-        uses: helm/chart-testing-action@v2.7.0
+        uses: helm/chart-testing-action@v2.8.0
 
       - name: Lint Charts
         run: ct lint --config ci/chart-testing-config.yaml
