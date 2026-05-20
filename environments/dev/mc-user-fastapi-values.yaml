@@ -1,6 +1,7 @@
 replicaCount: 1
 image:
-  tag: "1.0.0-dev"
+  tag: "dev-9-a8da9d63"
+  repository: docker.io/elioxrom/mc-user-fastapi
 resources:
   requests:
     cpu: 150m
