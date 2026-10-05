@@ -1,0 +1,118 @@
+name: Deploy to lab (argocd-kind-lab)
+
+# Punto de disparo del flujo del LABORATORIO (ver
+# eliox-gitops-harness/CLAUDE.md, seccion "Dos flujos"). A proposito NO vive
+# en mc-user-fastapi: hay un solo values.yaml gobernando ambos despliegues
+# (este mismo archivo, el que ya edita/versiona main.yml de mc-user-fastapi
+# via PR a esta rama), asi que lo correcto es disparar cuando ESE archivo
+# cambia aqui - no antes, no con una copia aparte. El lab no construye
+# ninguna imagen propia ni mantiene su propio values: solo re-publica, tal
+# cual, lo que ya quedo mergeado en gitops.
+#
+# Necesita un runner self-hosted (label "kind-local") en la misma maquina
+# donde corre el kind cluster del lab, con kubeconfig ya apuntando al
+# contexto "kind-hub" (mismo patron que generic-charts-ms/.github/workflows/
+# publish.yml). GitHub-hosted no puede alcanzar
+# artifactory.artifactory.svc.cluster.local ni el API server de kind.
+
+on:
+  push:
+    branches: [ "gitops" ]
+    paths:
+      - "environments/dev/mc-user-fastapi-values.yaml"
+  workflow_dispatch:
+
+jobs:
+  deploy-lab:
+    runs-on: [self-hosted, kind-local]
+
+    steps:
+      - name: Checkout eliox-platform-config
+        uses: actions/checkout@v4
+
+      - name: Checkout argocd-kind-lab
+        uses: actions/checkout@v4
+        with:
+          repository: elioxrome/argocd-kind-lab
+          path: lab
+
+      - name: Checkout generic-charts-ms
+        uses: actions/checkout@v4
+        with:
+          repository: elioxrome/generic-charts-ms
+          path: generic-chart
+
+      - name: Install yq
+        run: |
+          # Sin sudo: el runner self-hosted no tiene terminal para la
+          # password. Ademas /usr/bin/yq en esta laptop es OTRO yq (el
+          # wrapper en Python de jq, sintaxis incompatible) - se instala en
+          # $HOME/.local/bin y se antepone al PATH para no chocar con ese.
+          mkdir -p "$HOME/.local/bin"
+          wget -qO "$HOME/.local/bin/yq" https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          chmod +x "$HOME/.local/bin/yq"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          "$HOME/.local/bin/yq" --version
+
+      - name: Adaptar el values para el chart generico (no se persiste)
+        run: |
+          # environments/dev/mc-user-fastapi-values.yaml es la UNICA fuente
+          # editable (la gobierna main.yml via PR). generic-charts-ms exige
+          # "nameOverride" (ver gotcha en el harness) porque aqui corre como
+          # dependencia/subchart - ese campo no aplica al chart propio de
+          # mc-user-fastapi en charts/, por eso no vive en el archivo
+          # original. Se copia a un archivo temporal solo para agregarlo;
+          # el original no se toca ni se commitea nada nuevo.
+          cp environments/dev/mc-user-fastapi-values.yaml /tmp/lab-values.yaml
+          yq -i '.nameOverride = "mc-user-fastapi"' /tmp/lab-values.yaml
+          cat /tmp/lab-values.yaml
+
+      - name: Write Artifactory credentials for the lab scripts
+        env:
+          ARTIFACTORY_USER: ${{ secrets.ARTIFACTORY_USER }}
+          ARTIFACTORY_PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
+        run: |
+          mkdir -p lab/.generated
+          cat > lab/.generated/artifactory-admin.env <<EOF
+          ARTIFACTORY_USER=${ARTIFACTORY_USER}
+          ARTIFACTORY_PASSWORD=${ARTIFACTORY_PASSWORD}
+          EOF
+
+      - name: Publish release chart (mc-user-fastapi-0.1.0-dev)
+        run: |
+          ./lab/artifactory/publish-release-chart.sh \
+            ./generic-chart \
+            /tmp/lab-values.yaml \
+            mc-user-fastapi 0.1.0-dev
+
+      - name: Install/update the ApplicationSet in ArgoCD
+        run: |
+          kubectl --context kind-hub apply -f lab/argocd/applicationsets/mc-user-fastapi-appset.yaml
+
+      - name: Force ArgoCD to pick up the new chart content
+        run: |
+          APP="mc-user-fastapi-dev"
+          NS="argocd-it4t"
+          for _ in $(seq 1 30); do
+            kubectl --context kind-hub -n "$NS" get application "$APP" >/dev/null 2>&1 && break
+            sleep 2
+          done
+          kubectl --context kind-hub -n "$NS" annotate application "$APP" \
+            argocd.argoproj.io/refresh=hard --overwrite
+
+      - name: Wait for sync + print status
+        run: |
+          APP="mc-user-fastapi-dev"
+          NS="argocd-it4t"
+          for _ in $(seq 1 60); do
+            SYNC=$(kubectl --context kind-hub -n "$NS" get application "$APP" -o jsonpath='{.status.sync.status}' 2>/dev/null || true)
+            HEALTH=$(kubectl --context kind-hub -n "$NS" get application "$APP" -o jsonpath='{.status.health.status}' 2>/dev/null || true)
+            echo "sync=$SYNC health=$HEALTH"
+            [[ "$SYNC" == "Synced" && "$HEALTH" == "Healthy" ]] && break
+            sleep 5
+          done
+          kubectl --context kind-hub -n apps-dev get pods -o wide
+
+      - name: Clean up credentials file
+        if: always()
+        run: rm -f lab/.generated/artifactory-admin.env
