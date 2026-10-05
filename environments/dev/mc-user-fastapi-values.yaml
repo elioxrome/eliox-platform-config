@@ -1,6 +1,6 @@
 replicaCount: 1
 image:
-  tag: "dev-12-ddc70ddc"
+  tag: "dev-15-f7fffe62"
   repository: docker.io/elioxrom/mc-user-fastapi
 resources:
   requests:
