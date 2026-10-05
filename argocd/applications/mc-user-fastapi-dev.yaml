@@ -1,8 +1,13 @@
+# namespace/name: en el laboratorio local (argocd-kind-lab) la unica
+# instancia de ArgoCD corriendo es "argocd-it4t" (no existe el namespace
+# "argocd" por defecto); "platform" en el nombre evita chocar con la
+# Application "mc-user-fastapi-dev" que ya gestiona el flujo del lab desde
+# Artifactory, dentro del mismo namespace.
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: mc-user-fastapi-dev
-  namespace: argocd
+  name: mc-user-fastapi-platform-dev
+  namespace: argocd-it4t
 spec:
   project: default
 
