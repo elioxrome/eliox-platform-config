@@ -28,16 +28,16 @@ jobs:
 
     steps:
       - name: Checkout eliox-platform-config
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Checkout argocd-kind-lab
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           repository: elioxrome/argocd-kind-lab
           path: lab
 
       - name: Checkout generic-charts-ms
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           repository: elioxrome/generic-charts-ms
           path: generic-chart
